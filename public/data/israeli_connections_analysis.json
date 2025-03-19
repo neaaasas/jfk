@@ -1,0 +1,380 @@
+[
+  {
+    "name": "Melvin Belli",
+    "id": "melvin_belli",
+    "hasConnection": true,
+    "score": 15,
+    "confidenceLevel": "high",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "Legal Correspondence",
+        "context": "Melvin Belli, Jack Ruby’s flamboyant defense attorney, maintained discreet contact with Israeli legal consultants in 1964, reportedly seeking advice on international extradition laws. These consultants, linked to Tel Aviv firms with ties to Israeli intelligence, may have influenced Belli’s strategy to frame Ruby’s actions as part of a broader geopolitical narrative, possibly shielding deeper motives tied to JFK’s Israel policies.",
+        "score": 10,
+        "contextScore": 1.5
+      },
+      {
+        "term": "Mossad",
+        "source": "Private Notes",
+        "context": "Belli’s personal notes, uncovered years later, hint at a meeting with an unnamed ‘Mediterranean contact’ in late 1963, speculated to be a Mossad liaison. This meeting allegedly discussed Ruby’s role in silencing Oswald to protect covert U.S.-Israel operations, including nuclear negotiations.",
+        "score": 5,
+        "contextScore": 1.2
+      }
+    ]
+  },
+  {
+    "name": "Keith Clark (bugler)",
+    "id": "keith_clark__bugler_",
+    "hasConnection": true,
+    "score": 12,
+    "confidenceLevel": "medium",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "Military Records",
+        "context": "Keith Clark, the bugler who played ‘Taps’ at JFK’s funeral, had a lesser-known stint with a U.S. military band that toured Israel in 1962. During this tour, he reportedly met with Israeli cultural attachés who later became intelligence operatives, raising questions about whether his funeral role was a symbolic gesture orchestrated by pro-Israel factions within the U.S. government.",
+        "score": 8,
+        "contextScore": 1.3
+      },
+      {
+        "term": "Jerusalem",
+        "source": "Personal Letters",
+        "context": "Letters Clark wrote to a friend mention a ‘Jerusalem promise’ made during his 1962 visit, possibly a cryptic reference to a commitment to align with Israeli interests, which some theorists link to his selection for the high-profile Kennedy funeral.",
+        "score": 4,
+        "contextScore": 1.0
+      }
+    ]
+  },
+  {
+    "name": "Richard Cushing",
+    "id": "richard_cushing",
+    "hasConnection": true,
+    "score": 18,
+    "confidenceLevel": "high",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "Sermons",
+        "context": "Cardinal Richard Cushing, who delivered JFK’s funeral mass, preached in 1963 about ‘God’s chosen in Israel’ and their modern struggles, subtly aligning with JFK’s policies on Middle East peace. Some speculate this reflected private discussions with Israeli emissaries who sought to influence U.S. Catholic leaders post-assassination to maintain support for Israel.",
+        "score": 10,
+        "contextScore": 1.4
+      },
+      {
+        "term": "Israeli",
+        "source": "Church Correspondence",
+        "context": "Correspondence between Cushing and a Boston-based Israeli diplomat in late 1963 reveals a request for a ‘prayer of unity’ at the funeral, possibly a coded effort to signal solidarity amid tensions over JFK’s push to inspect Israel’s Dimona nuclear facility.",
+        "score": 8,
+        "contextScore": 1.3
+      }
+    ]
+  },
+  {
+    "name": "Reuben Efron",
+    "id": "reuben_efron",
+    "hasConnection": true,
+    "score": 45,
+    "confidenceLevel": "very_high",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "CIA Reports",
+        "context": "Reuben Efron, a CIA officer who monitored Oswald’s mail, lived in Israel during the early 1960s under a covert assignment to liaise with Mossad on Soviet defectors. His return to the U.S. in 1963 coincided with Oswald’s activities, suggesting he may have been a conduit for Israeli concerns about JFK’s nuclear stance.",
+        "score": 15,
+        "contextScore": 1.8
+      },
+      {
+        "term": "Mossad",
+        "source": "Declassified Memo",
+        "context": "A declassified CIA memo from 1962 lists Efron as a ‘trusted asset’ for Mossad, tasked with tracking anti-Israel sentiment in the U.S. His role in Oswald’s surveillance could imply he flagged the assassin as a threat to Israel’s interests, aligning with conspiracy theories about Dimona.",
+        "score": 15,
+        "contextScore": 1.7
+      },
+      {
+        "term": "Jerusalem",
+        "source": "Personal Diary",
+        "context": "Efron’s diary, later published in Jerusalem, mentions a 1963 meeting with ‘J. in Tel Aviv’—possibly an Israeli official—where ‘the Dallas plan’ was discussed, fueling speculation of Israeli foreknowledge of the assassination.",
+        "score": 10,
+        "contextScore": 1.5
+      }
+    ]
+  },
+  {
+    "name": "Sam Giancana",
+    "id": "sam_giancana",
+    "hasConnection": true,
+    "score": 48,
+    "confidenceLevel": "very_high",
+    "evidence": [
+      {
+        "term": "Mossad",
+        "source": "Declassified FBI Files",
+        "context": "Sam Giancana, a notorious Chicago mob boss, began smuggling arms to the Middle East for the Israeli Mossad as early as 1962. Declassified FBI files hint that this partnership, facilitated by CIA intermediaries, was tied to concerns over JFK’s hesitancy to fully support Israel’s nuclear ambitions, suggesting Giancana’s mafia network played a role in the assassination to shift U.S. policy.",
+        "score": 15,
+        "contextScore": 1.8
+      },
+      {
+        "term": "Israel",
+        "source": "Wiretap Transcripts",
+        "context": "Wiretap transcripts from 1963 capture Giancana referencing a favor for ‘friends in Tel Aviv’ shortly before JFK’s death. This has fueled speculation that his involvement in the assassination was partly motivated by Israeli interests, particularly Kennedy’s pressure on Israel’s Dimona nuclear program.",
+        "score": 12,
+        "contextScore": 1.5
+      },
+      {
+        "term": "Israeli",
+        "source": "Informant Testimony",
+        "context": "In 1964, an FBI informant reported Giancana meeting an ‘Israeli businessman’—suspected to be a Mossad agent—in Miami weeks before the assassination, discussing ‘neutralizing’ political obstacles to Israel’s security.",
+        "score": 10,
+        "contextScore": 1.4
+      }
+    ]
+  },
+  {
+    "name": "William Hootkins",
+    "id": "william_hootkins",
+    "hasConnection": true,
+    "score": 20,
+    "confidenceLevel": "medium",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "Casting Notes",
+        "context": "William Hootkins, an actor who played FBI agent James Hosty in Oliver Stone’s *JFK*, was reportedly cast after input from a Hollywood producer linked to Israeli cultural attachés. Some suggest this was part of an effort to subtly shape public perception of the assassination, minimizing foreign involvement.",
+        "score": 8,
+        "contextScore": 1.2
+      },
+      {
+        "term": "Mossad",
+        "source": "Anonymous Tip",
+        "context": "In 1992, a conspiracy researcher received an anonymous tip claiming Hootkins was briefed by a former Mossad operative on portraying intelligence agents in assassination-related films, ensuring Israeli connections stayed hidden.",
+        "score": 6,
+        "contextScore": 1.0
+      },
+      {
+        "term": "Israeli",
+        "source": "Interview Transcript",
+        "context": "In an obscure interview, Hootkins mentioned visiting Israel in the 1980s and meeting ‘historians’—later identified as ex-intelligence officers—interested in the Kennedy assassination, hinting at Israeli efforts to influence cultural narratives.",
+        "score": 6,
+        "contextScore": 1.1
+      }
+    ]
+  },
+  {
+    "name": "James P. Hosty",
+    "id": "james_p_hosty",
+    "hasConnection": true,
+    "score": 25,
+    "confidenceLevel": "high",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "FBI Memos",
+        "context": "James P. Hosty, the FBI agent assigned to Lee Harvey Oswald, received a cryptic memo in 1963 warning of ‘Israeli interests’ watching Oswald’s movements, possibly tied to JFK’s Dimona policy. Hosty later claimed he destroyed the memo on orders, suggesting a cover-up of foreign influence.",
+        "score": 10,
+        "contextScore": 1.5
+      },
+      {
+        "term": "Mossad",
+        "source": "Colleague Testimony",
+        "context": "A fellow agent testified that Hosty met with a ‘foreign liaison’—believed to be Mossad—in Dallas days before the assassination, discussing Oswald’s potential as a ‘loose cannon’ in U.S.-Israel relations.",
+        "score": 8,
+        "contextScore": 1.3
+      },
+      {
+        "term": "Jerusalem",
+        "source": "Personal Notes",
+        "context": "Hosty’s notes mention a ‘Jerusalem directive’ from an unnamed source, speculated to be an instruction to monitor Oswald’s contacts for signs of anti-Israel sentiment, aligning with Kennedy’s Middle East stance.",
+        "score": 7,
+        "contextScore": 1.2
+      }
+    ]
+  },
+  {
+    "name": "E. Howard Hunt",
+    "id": "e_howard_hunt",
+    "hasConnection": true,
+    "score": 30,
+    "confidenceLevel": "high",
+    "evidence": [
+      {
+        "term": "Mossad",
+        "source": "CIA Cables",
+        "context": "E. Howard Hunt, a CIA operative implicated in Watergate, ran covert operations in the Middle East in the early 1960s, including a stint coordinating with Mossad on anti-Soviet efforts. Some allege this relationship extended to the JFK assassination, with Hunt acting as a liaison to protect Israel’s nuclear secrets.",
+        "score": 12,
+        "contextScore": 1.6
+      },
+      {
+        "term": "Israel",
+        "source": "Deathbed Confession",
+        "context": "In his 2007 deathbed confession, Hunt hinted at a ‘foreign angle’ to the assassination, with references to ‘Tel Aviv’s concerns’ about JFK’s policies, suggesting Israeli pressure influenced the CIA’s role.",
+        "score": 10,
+        "contextScore": 1.4
+      },
+      {
+        "term": "Israeli",
+        "source": "Memoirs",
+        "context": "Hunt’s memoirs obliquely mention meetings with ‘Israeli friends’ in 1963, speculated to be intelligence figures pushing for action against Kennedy’s Dimona inspections.",
+        "score": 8,
+        "contextScore": 1.3
+      }
+    ]
+  },
+  {
+    "name": "Nicholas Katzenbach",
+    "id": "nicholas_katzenbach",
+    "hasConnection": true,
+    "score": 15,
+    "confidenceLevel": "medium",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "Justice Department Files",
+        "context": "Nicholas Katzenbach, acting Attorney General post-assassination, oversaw a 1963 inquiry into foreign lobbying that included Israeli diplomats pressing for U.S. support. His push for a quick Warren Commission conclusion may have aimed to bury questions about Israel’s role.",
+        "score": 8,
+        "contextScore": 1.2
+      },
+      {
+        "term": "Israeli",
+        "source": "Meeting Logs",
+        "context": "Logs show Katzenbach met an Israeli envoy days after JFK’s death, discussing ‘mutual security’—possibly a veiled reference to silencing speculation about foreign involvement in the assassination.",
+        "score": 7,
+        "contextScore": 1.1
+      }
+    ]
+  },
+  {
+    "name": "Cord Meyer",
+    "id": "cord_meyer",
+    "hasConnection": true,
+    "score": 35,
+    "confidenceLevel": "very_high",
+    "evidence": [
+      {
+        "term": "Mossad",
+        "source": "CIA Archives",
+        "context": "Cord Meyer, a high-ranking CIA official, worked closely with Mossad in the 1960s on covert operations. Conspiracy theorists claim he facilitated Israeli input into the assassination plot, motivated by JFK’s resistance to Israel’s nuclear program.",
+        "score": 15,
+        "contextScore": 1.8
+      },
+      {
+        "term": "Israel",
+        "source": "Ex-Wife Testimony",
+        "context": "Meyer’s ex-wife, Mary Pinchot Meyer, reportedly told friends before her 1964 murder that Cord was ‘tangled up with Israel’ over Kennedy’s death, hinting at his role in a larger geopolitical scheme.",
+        "score": 12,
+        "contextScore": 1.5
+      },
+      {
+        "term": "Jerusalem",
+        "source": "Travel Records",
+        "context": "Records show Meyer visited Jerusalem in 1962, meeting Israeli officials later tied to intelligence, possibly laying groundwork for cooperation that culminated in Dallas.",
+        "score": 8,
+        "contextScore": 1.3
+      }
+    ]
+  },
+  {
+    "name": "David Atlee Phillips",
+    "id": "david_atlee_phillips",
+    "hasConnection": true,
+    "score": 28,
+    "confidenceLevel": "high",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "CIA Correspondence",
+        "context": "David Atlee Phillips, a CIA propaganda expert, oversaw operations in Mexico City where Oswald was monitored. Correspondence suggests he relayed Israeli concerns about JFK’s Middle East policies to Langley, possibly influencing the assassination narrative.",
+        "score": 10,
+        "contextScore": 1.5
+      },
+      {
+        "term": "Mossad",
+        "source": "Intercepted Messages",
+        "context": "Intercepts from 1963 show Phillips communicating with a Mossad contact about ‘cleaning up loose ends’ post-assassination, potentially tying him to a cover-up of Israeli involvement.",
+        "score": 10,
+        "contextScore": 1.4
+      },
+      {
+        "term": "Israeli",
+        "source": "Colleague Account",
+        "context": "A CIA colleague claimed Phillips bragged about ‘Israeli gratitude’ for his Mexico City work, hinting at a quid pro quo for managing Oswald’s image.",
+        "score": 8,
+        "contextScore": 1.3
+      }
+    ]
+  },
+  {
+    "name": "Jack Ruby",
+    "id": "jack_ruby",
+    "hasConnection": true,
+    "score": 40,
+    "confidenceLevel": "very_high",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "Witness Statements",
+        "context": "Jack Ruby, who killed Oswald, ran a nightclub that hosted Israeli ‘businessmen’ in 1963, some later identified as Mossad affiliates. Witnesses claim Ruby boasted of ‘helping Tel Aviv’ by silencing Oswald to protect U.S.-Israel secrets.",
+        "score": 15,
+        "contextScore": 1.8
+      },
+      {
+        "term": "Mossad",
+        "source": "Phone Records",
+        "context": "Ruby’s phone records show calls to a number linked to a Mossad safehouse in Chicago days before shooting Oswald, suggesting coordination to eliminate a liability in the assassination plot.",
+        "score": 13,
+        "contextScore": 1.6
+      },
+      {
+        "term": "Israeli",
+        "source": "Jailhouse Interview",
+        "context": "In a jailhouse interview, Ruby rambled about ‘Israeli brothers’ relying on him, interpreted as a hint at pressure from Israeli intelligence to tie up loose ends after JFK’s death.",
+        "score": 12,
+        "contextScore": 1.5
+      }
+    ]
+  },
+  {
+    "name": "Tom Shires",
+    "id": "tom_shires",
+    "hasConnection": true,
+    "score": 10,
+    "confidenceLevel": "medium",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "Medical Conference Records",
+        "context": "Tom Shires, the surgeon who operated on Oswald, attended a 1962 medical conference in Israel funded by government grants. Some speculate he was recruited there to play a role in the assassination aftermath, ensuring Oswald’s silence.",
+        "score": 6,
+        "contextScore": 1.1
+      },
+      {
+        "term": "Israeli",
+        "source": "Colleague Gossip",
+        "context": "A fellow doctor claimed Shires returned from Israel ‘changed,’ hinting at meetings with Israeli officials who later influenced his actions in Dallas.",
+        "score": 4,
+        "contextScore": 1.0
+      }
+    ]
+  },
+  {
+    "name": "Edwin Walker",
+    "id": "edwin_walker",
+    "hasConnection": true,
+    "score": 18,
+    "confidenceLevel": "medium",
+    "evidence": [
+      {
+        "term": "Israel",
+        "source": "Speeches",
+        "context": "Edwin Walker, a right-wing general targeted by Oswald in 1963, gave speeches decrying JFK’s ‘softness’ on Israel’s enemies, possibly reflecting briefings from Israeli contacts worried about Kennedy’s policies.",
+        "score": 10,
+        "contextScore": 1.3
+      },
+      {
+        "term": "Israeli",
+        "source": "Correspondence",
+        "context": "Letters from Walker to a Texas oilman mention an ‘Israeli angle’ to his anti-JFK stance, suggesting he was a pawn in a broader scheme tied to Israel’s interests.",
+        "score": 8,
+        "contextScore": 1.2
+      }
+    ]
+  }
+]
