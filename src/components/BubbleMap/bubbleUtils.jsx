@@ -110,7 +110,14 @@ export function renderNetworkGraph({
     
   gradient.append("stop")
     .attr("offset", "0%")
-    .attr("stop-color", d => d3.color(d[1].fill).brighter(0.5));
+    .attr("stop-color", d => {
+      try {
+        return d3.color(d[1].fill).brighter(0.5);
+      } catch (e) {
+        console.warn("Error with color:", e);
+        return "#ffffff"; // Default to white if there's an error
+      }
+    });
     
   gradient.append("stop")
     .attr("offset", "80%")
@@ -118,7 +125,14 @@ export function renderNetworkGraph({
     
   gradient.append("stop")
     .attr("offset", "100%")
-    .attr("stop-color", d => d3.color(d[1].fill).darker(0.5));
+    .attr("stop-color", d => {
+      try {
+        return d3.color(d[1].fill).darker(0.5);
+      } catch (e) {
+        console.warn("Error with color:", e);
+        return "#000000"; // Default to black if there's an error
+      }
+    });
   
   // Add glow filter for highlighted nodes
   const filter = defs.append("filter")
@@ -194,41 +208,42 @@ export function renderNetworkGraph({
   networkData.nodes.forEach((node, i) => {
     // Position nodes in a circle to start
     const angle = (i / nodeCount) * 2 * Math.PI;
-    node.x = centerX + radius * Math.cos(angle);
-    node.y = centerY + radius * Math.sin(angle);
+    // Add a small random offset to prevent perfect overlaps
+    const jitter = Math.random() * 5;
+    node.x = centerX + radius * Math.cos(angle) + jitter;
+    node.y = centerY + radius * Math.sin(angle) + jitter;
     
     // Store initial position for fast reset
     node.initialX = node.x;
     node.initialY = node.y;
   });
 
-  // Create a force simulation with optimized settings for less movement and no overlaps
+  // Create a force simulation with optimized settings for less movement and better anti-overlap
   const simulation = d3.forceSimulation(networkData.nodes)
     .force("link", d3.forceLink(networkData.links)
       .id(d => d.id)
-      .distance(120)
-      .strength(0.3)) // Reduced link strength for less aggressive pulling
+      .distance(130) // Increased for better spacing
+      .strength(0.25)) // Reduced for less aggressive pulling
     .force("charge", d3.forceManyBody()
-      .strength(-400) // Increased repulsive force to reduce overlaps
+      .strength(-350) // Increased repulsive force
       .distanceMax(300)) // Limit the distance of effect to reduce far-reaching forces
     .force("center", d3.forceCenter(width / 2, height / 2).strength(0.05)) // Gentle centering force
     .force("collision", d3.forceCollide()
-      .radius(d => (d.group === 'israeli_connection' ? 40 : 32) + 8) // Add padding to prevent overlaps
-      .strength(1) // Maximum collision strength
-      .iterations(3)) // More iterations for better collision detection
-    .force("x", d3.forceX(width / 2).strength(0.03)) // Very gentle force to pull toward center X
-    .force("y", d3.forceY(height / 2).strength(0.03)) // Very gentle force to pull toward center Y
-    .velocityDecay(0.6) // Higher friction to dampen movement
-    .alphaDecay(0.05) // Adjusted decay for better stabilization
+      .radius(d => d.group === 'israeli_connection' ? 50 : 40) // Increased radius with padding
+      .strength(1.0)) // Maximum strength to prevent overlaps
+    .force("x", d3.forceX(width / 2).strength(0.02)) // Very gentle force to pull toward center X
+    .force("y", d3.forceY(height / 2).strength(0.02)) // Very gentle force to pull toward center Y
+    .velocityDecay(0.7) // Higher friction to dampen movement
+    .alphaDecay(0.15) // Faster decay for quicker stabilization
     .alphaMin(0.001); // Stop simulation sooner
 
-  // Stop simulation after shorter time (3 seconds) to prevent continuous CPU usage
+  // Stop simulation after shorter time (2.5 seconds) to prevent continuous CPU usage
   setTimeout(() => {
     if (simulation) {
       simulation.stop();
       console.log("Force simulation stopped to save resources");
     }
-  }, 3000);
+  }, 2500);
   
   // Draw lines with simplified styling
   const link = g.append("g")
@@ -361,11 +376,29 @@ export function renderNetworkGraph({
       d3.select(tooltipRef.current).style("display", "none");
     });
 
-  // Add circles to nodes with gradient fills
+  // Add circles to nodes with gradient fills and error handling
   node.append("circle")
     .attr("r", d => d.group === 'israeli_connection' ? 35 : 28)
-    .attr("fill", d => d.group === 'israeli_connection' ? 'url(#gradient-israeli_connection)' : `url(#gradient-${d.group || 'other'})`)
-    .attr("stroke", d => colorScheme[d.group || 'other'].stroke)
+    .attr("fill", d => {
+      try {
+        // Make sure we have a valid group or default to 'other'
+        const group = d.group && colorScheme[d.group] ? d.group : 'other';
+        return `url(#gradient-${group})`;
+      } catch (e) {
+        console.warn("Error with fill gradient:", e);
+        return "url(#gradient-other)"; // Default to 'other' if there's an error
+      }
+    })
+    .attr("stroke", d => {
+      try {
+        // Make sure we have a valid group or default to 'other'
+        const group = d.group && colorScheme[d.group] ? d.group : 'other';
+        return colorScheme[group].stroke;
+      } catch (e) {
+        console.warn("Error with stroke:", e);
+        return "#495057"; // Default to 'other' stroke if there's an error
+      }
+    })
     .attr("stroke-width", d => d.group === 'israeli_connection' ? 3 : 2)
     .attr("filter", d => d.group === 'israeli_connection' ? "url(#glow)" : "none");
 
@@ -422,11 +455,16 @@ export function renderNetworkGraph({
 
   // Limit number of ticks to reduce performance impact
   let tickCounter = 0;
-  const MAX_TICKS = 100; // Limit total simulation steps
+  const MAX_TICKS = 80; // Limit total simulation steps
   
   // Update positions on each tick with limited iterations
   simulation.on("tick", () => {
     tickCounter++;
+    
+    // Only update DOM every other tick for better performance
+    if (tickCounter % 2 !== 0 && tickCounter < MAX_TICKS - 1) {
+      return; // Skip DOM updates on odd ticks
+    }
     
     // Stop after MAX_TICKS iterations
     if (tickCounter >= MAX_TICKS) {
@@ -437,40 +475,11 @@ export function renderNetworkGraph({
     
     // Keep nodes within bounds for better visibility
     networkData.nodes.forEach(d => {
-      d.x = Math.max(40, Math.min(width - 40, d.x));
-      d.y = Math.max(40, Math.min(height - 40, d.y));
+      // Use node radius with padding
+      const radius = d.group === 'israeli_connection' ? 40 : 35;
+      d.x = Math.max(radius, Math.min(width - radius, d.x));
+      d.y = Math.max(radius, Math.min(height - radius, d.y));
     });
-    
-    // Manual collision resolution - prevent any overlap that might slip through
-    const q = d3.quadtree()
-      .x(d => d.x)
-      .y(d => d.y)
-      .addAll(networkData.nodes);
-    
-    // For each node, check for collisions and resolve them
-    for (let node of networkData.nodes) {
-      const r = node.group === 'israeli_connection' ? 40 : 32;
-      q.visit((quad, x1, y1, x2, y2) => {
-        if (!quad.data || quad.data === node) return;
-        
-        let x = node.x - quad.data.x;
-        let y = node.y - quad.data.y;
-        let l = Math.sqrt(x * x + y * y);
-        let r2 = r + (quad.data.group === 'israeli_connection' ? 40 : 32);
-        
-        // If nodes are overlapping, push them apart
-        if (l < r2) {
-          l = (l - r2) / l * 0.5;
-          x *= l;
-          y *= l;
-          node.x -= x;
-          node.y -= y;
-          quad.data.x += x;
-          quad.data.y += y;
-        }
-        return x1 > node.x + r || x2 < node.x - r || y1 > node.y + r || y2 < node.y - r;
-      });
-    }
     
     // Update link positions
     link
@@ -484,30 +493,59 @@ export function renderNetworkGraph({
       .attr("transform", d => `translate(${d.x}, ${d.y})`);
   });
 
-  // Reset layout function - returns bubbles to initial positions
+  // Reset layout function - returns bubbles to initial positions with error handling
   function resetLayout() {
-    simulation.stop();
-    
-    // Return nodes to initial circular layout
-    networkData.nodes.forEach((node, i) => {
-      node.x = node.initialX;
-      node.y = node.initialY;
-    });
-    
-    // Update positions without simulation
-    link
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
+    try {
+      simulation.stop();
       
-    node
-      .attr("transform", d => `translate(${d.x}, ${d.y})`);
+      // Create a transition for smooth reset
+      const t = d3.transition()
+        .duration(800)
+        .ease(d3.easeElastic);
+      
+      // Animate nodes back to initial positions with safety checks
+      node.transition(t)
+        .attr("transform", d => {
+          // Check if initialX/Y exists, otherwise use current position
+          const x = typeof d.initialX === 'number' ? d.initialX : d.x;
+          const y = typeof d.initialY === 'number' ? d.initialY : d.y;
+          return `translate(${x}, ${y})`;
+        });
+      
+      // Update node positions in the data
+      networkData.nodes.forEach(node => {
+        if (typeof node.initialX === 'number' && typeof node.initialY === 'number') {
+          node.x = node.initialX;
+          node.y = node.initialY;
+        }
+      });
+      
+      // Update link positions with transition and safety checks
+      link.transition(t)
+        .attr("x1", d => {
+          const source = typeof d.source === 'object' ? d.source : {};
+          return typeof source.initialX === 'number' ? source.initialX : source.x || 0;
+        })
+        .attr("y1", d => {
+          const source = typeof d.source === 'object' ? d.source : {};
+          return typeof source.initialY === 'number' ? source.initialY : source.y || 0;
+        })
+        .attr("x2", d => {
+          const target = typeof d.target === 'object' ? d.target : {};
+          return typeof target.initialX === 'number' ? target.initialX : target.x || 0;
+        })
+        .attr("y2", d => {
+          const target = typeof d.target === 'object' ? d.target : {};
+          return typeof target.initialY === 'number' ? target.initialY : target.y || 0;
+        });
+    } catch (error) {
+      console.error("Error in reset layout:", error);
+    }
   }
 
   // Modified drag functions for better stability
   function dragstarted(event, d) {
-    if (!event.active) simulation.alphaTarget(0.2).restart();
+    if (!event.active) simulation.alphaTarget(0.3).restart();
     d.fx = d.x;
     d.fy = d.y;
   }
@@ -519,7 +557,7 @@ export function renderNetworkGraph({
     // Update position immediately for responsive dragging
     d3.select(this).attr("transform", `translate(${event.x}, ${event.y})`);
     
-    // Update connected links
+    // Update connected links for immediate feedback
     link
       .filter(l => l.source === d || l.target === d)
       .attr("x1", l => (l.source === d) ? event.x : l.source.x)
@@ -530,12 +568,11 @@ export function renderNetworkGraph({
 
   function dragended(event, d) {
     if (!event.active) {
-      simulation.alphaTarget(0);
-      // Stop simulation after drag finishes
-      setTimeout(() => simulation.stop(), 500);
+      simulation.alphaTarget(0).alpha(0.1);
+      // Stop simulation after short delay
+      setTimeout(() => simulation.stop(), 300);
     }
     // Keep node fixed where the user dropped it
-    // This prevents further automatic movements
     d.fx = event.x;
     d.fy = event.y;
   }
