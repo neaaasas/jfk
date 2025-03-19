@@ -26,7 +26,7 @@ const LoadingScreen = ({ isLoading, progress = 0 }) => {
         <WorldMap animationProgress={animationProgress} />
         <StarOfDavid animationProgress={animationProgress} />
         <div className="loading-text">
-          <h2>Connecting Jewish History...</h2>
+          <h2>Loading Jewish Connections...</h2>
           <div className="progress-bar">
             <div 
               className="progress-fill" 
