@@ -202,21 +202,24 @@ export function renderNetworkGraph({
     node.initialY = node.y;
   });
 
-  // Create a force simulation with optimized settings for less movement
+  // Create a force simulation with optimized settings for less movement and no overlaps
   const simulation = d3.forceSimulation(networkData.nodes)
     .force("link", d3.forceLink(networkData.links)
       .id(d => d.id)
       .distance(120)
       .strength(0.3)) // Reduced link strength for less aggressive pulling
     .force("charge", d3.forceManyBody()
-      .strength(-300) // Slightly reduced repulsive force
+      .strength(-400) // Increased repulsive force to reduce overlaps
       .distanceMax(300)) // Limit the distance of effect to reduce far-reaching forces
     .force("center", d3.forceCenter(width / 2, height / 2).strength(0.05)) // Gentle centering force
-    .force("collision", d3.forceCollide().radius(d => d.group === 'israeli_connection' ? 45 : 35).strength(0.7))
-    .force("x", d3.forceX(width / 2).strength(0.02)) // Very gentle force to pull toward center X
-    .force("y", d3.forceY(height / 2).strength(0.02)) // Very gentle force to pull toward center Y
+    .force("collision", d3.forceCollide()
+      .radius(d => (d.group === 'israeli_connection' ? 40 : 32) + 8) // Add padding to prevent overlaps
+      .strength(1) // Maximum collision strength
+      .iterations(3)) // More iterations for better collision detection
+    .force("x", d3.forceX(width / 2).strength(0.03)) // Very gentle force to pull toward center X
+    .force("y", d3.forceY(height / 2).strength(0.03)) // Very gentle force to pull toward center Y
     .velocityDecay(0.6) // Higher friction to dampen movement
-    .alphaDecay(0.1) // Faster decay for quicker stabilization
+    .alphaDecay(0.05) // Adjusted decay for better stabilization
     .alphaMin(0.001); // Stop simulation sooner
 
   // Stop simulation after shorter time (3 seconds) to prevent continuous CPU usage
@@ -434,9 +437,40 @@ export function renderNetworkGraph({
     
     // Keep nodes within bounds for better visibility
     networkData.nodes.forEach(d => {
-      d.x = Math.max(30, Math.min(width - 30, d.x));
-      d.y = Math.max(30, Math.min(height - 30, d.y));
+      d.x = Math.max(40, Math.min(width - 40, d.x));
+      d.y = Math.max(40, Math.min(height - 40, d.y));
     });
+    
+    // Manual collision resolution - prevent any overlap that might slip through
+    const q = d3.quadtree()
+      .x(d => d.x)
+      .y(d => d.y)
+      .addAll(networkData.nodes);
+    
+    // For each node, check for collisions and resolve them
+    for (let node of networkData.nodes) {
+      const r = node.group === 'israeli_connection' ? 40 : 32;
+      q.visit((quad, x1, y1, x2, y2) => {
+        if (!quad.data || quad.data === node) return;
+        
+        let x = node.x - quad.data.x;
+        let y = node.y - quad.data.y;
+        let l = Math.sqrt(x * x + y * y);
+        let r2 = r + (quad.data.group === 'israeli_connection' ? 40 : 32);
+        
+        // If nodes are overlapping, push them apart
+        if (l < r2) {
+          l = (l - r2) / l * 0.5;
+          x *= l;
+          y *= l;
+          node.x -= x;
+          node.y -= y;
+          quad.data.x += x;
+          quad.data.y += y;
+        }
+        return x1 > node.x + r || x2 < node.x - r || y1 > node.y + r || y2 < node.y - r;
+      });
+    }
     
     // Update link positions
     link
