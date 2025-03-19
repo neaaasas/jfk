@@ -222,14 +222,14 @@ export function renderNetworkGraph({
   const simulation = d3.forceSimulation(networkData.nodes)
     .force("link", d3.forceLink(networkData.links)
       .id(d => d.id)
-      .distance(130) // Increased for better spacing
+      .distance(162.5) // Increased by 25% from 130 for better spacing
       .strength(0.25)) // Reduced for less aggressive pulling
     .force("charge", d3.forceManyBody()
-      .strength(-350) // Increased repulsive force
-      .distanceMax(300)) // Limit the distance of effect to reduce far-reaching forces
+      .strength(-437.5) // Increased by 25% from -350 for more repulsive force
+      .distanceMax(375)) // Increased by 25% from 300 to extend effect range
     .force("center", d3.forceCenter(width / 2, height / 2).strength(0.05)) // Gentle centering force
     .force("collision", d3.forceCollide()
-      .radius(d => d.group === 'israeli_connection' ? 50 : 40) // Increased radius with padding
+      .radius(d => d.group === 'israeli_connection' ? 62.5 : 50) // Increased by 25% from 50/40
       .strength(1.0)) // Maximum strength to prevent overlaps
     .force("x", d3.forceX(width / 2).strength(0.02)) // Very gentle force to pull toward center X
     .force("y", d3.forceY(height / 2).strength(0.02)) // Very gentle force to pull toward center Y
