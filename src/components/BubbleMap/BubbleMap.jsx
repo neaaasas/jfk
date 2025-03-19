@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { loadAndProcessData } from '../../utils/israeliConnectionUtils';
+import { playClickSound } from '../../utils/soundUtils';
 import Modal from '../common/Modal';
 import PersonDetail from '../PersonDetail/PersonDetail';
 import Menorah from './menorah';
@@ -75,6 +76,10 @@ const BubbleMap = () => {
   // Handle clicking on a node
   const handleNodeClick = (node) => {
     console.log("Node clicked:", node);
+    
+    // Play click sound when node is clicked
+    playClickSound();
+    
     setSelectedPerson(node);
     setIsModalOpen(true);
     console.log("Modal should be open now");

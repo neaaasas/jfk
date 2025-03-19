@@ -7,6 +7,7 @@ import AboutPage from './pages/AboutPage';
 import PDFPage from './pages/PDF';
 import Navbar from './components/Navigation/Navbar';
 import LoadingScreen from './components/LoadingScreen';
+import { initializeAudio } from './utils/soundUtils';
 import './App.css';
 
 function App() {
@@ -14,6 +15,9 @@ function App() {
   const [progress, setProgress] = useState(0);
   
   useEffect(() => {
+    // Initialize audio
+    initializeAudio();
+    
     // Simulate loading process
     const interval = setInterval(() => {
       setProgress(prevProgress => {

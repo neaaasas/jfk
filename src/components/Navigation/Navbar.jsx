@@ -1,5 +1,6 @@
 // src/components/Navigation/Navbar.jsx
 import { Link, useLocation } from 'react-router-dom';
+import AudioControls from '../AudioControls';
 
 const Navbar = () => {
   const location = useLocation();
@@ -30,6 +31,7 @@ const Navbar = () => {
           >
             About
           </Link>
+          <AudioControls />
         </div>
       </div>
     </nav>
