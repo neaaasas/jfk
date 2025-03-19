@@ -29,7 +29,7 @@ const Navbar = () => {
     <nav className="bg-gradient-to-r from-[#1a1a1a] to-[#252525] border-b border-gray-800 shadow-md">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <Link to="/" className="text-2xl font-bold text-blue-400 tracking-tight hover:text-blue-300 transition-colors">
-          JFK Network
+          JEWS FULL KONTROL (JFK) 
         </Link>
         
         <div className="flex items-center space-x-6 text-base">
