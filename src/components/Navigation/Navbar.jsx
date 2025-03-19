@@ -8,7 +8,7 @@ const Navbar = () => {
   const [showCopiedTooltip, setShowCopiedTooltip] = useState(false);
   
   // Placeholder for future crypto address or any other text to copy
-  const copyPlaceholder = "Coming soon...";
+  const copyPlaceholder = "28PL1UQ2BgnvawK4GfYVwEvP3woD9a1rne6TJXePpump";
   
   const handleCopyClick = (e) => {
     e.preventDefault();
