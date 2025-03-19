@@ -20,12 +20,6 @@ const Navbar = () => {
             Home
           </Link>
           <Link 
-            to="/israeli-connections" 
-            className="nav-link active-permanent"
-          >
-            Israeli Connections
-          </Link>
-          <Link 
             to="/about" 
             className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}
           >

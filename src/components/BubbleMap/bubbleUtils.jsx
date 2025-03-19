@@ -1,287 +1,521 @@
 import * as d3 from 'd3';
 
-// Optimize color schema
+// Enhanced color scheme
 export const colorScheme = {
-  main: { fill: "#FFD700", stroke: "#B8860B" },
-  suspect: { fill: "#DC143C", stroke: "#8B0000" },
-  involved: { fill: "#FF8C00", stroke: "#CD6600" },
-  witness: { fill: "#3CB371", stroke: "#2E8B57" },
-  investigation: { fill: "#4169E1", stroke: "#0000CD" },
-  israeli_intelligence: { fill: "#1E90FF", stroke: "#0000FF" },
-  us_intelligence: { fill: "#9932CC", stroke: "#8B008B" },
-  organized_crime: { fill: "#FF6347", stroke: "#CD5B45" },
-  government: { fill: "#808080", stroke: "#696969" },
-  other: { fill: "#A9A9A9", stroke: "#2F4F4F" }
+  main: { fill: '#e63946', stroke: '#c81d29' },
+  suspect: { fill: '#f1c453', stroke: '#d9aa33' },
+  witness: { fill: '#a8dadc', stroke: '#7dbdc0' },
+  involved: { fill: '#457b9d', stroke: '#2a6183' },
+  investigation: { fill: '#1d3557', stroke: '#0a2440' },
+  other: { fill: '#6c757d', stroke: '#495057' },
+  israeli_connection: { fill: '#ff8c00', stroke: '#e67e00' },
 };
 
-// Performance configuration for D3 simulation
-const PERFORMANCE_CONFIG = {
-  // Reduce simulation complexity
-  FORCE_STRENGTH: 0.05, // Lower value means less intense forces
-  LINK_STRENGTH: 0.5, // Higher value makes links more rigid 
-  CHARGE_STRENGTH: -30, // Less negative means less repulsion
-  COLLISION_RADIUS: 20, // Larger value prevents nodes from overlapping too much
-  
-  // Limit visual complexity
-  MAX_LINKS_RENDERED: 150, // Maximum number of connection lines to render
-  LINK_OPACITY: 0.5, // Lower opacity for links
-  USE_STRAIGHT_LINES: true, // Use straight lines instead of curved paths
-  
-  // Animation settings
-  ALPHA_DECAY: 0.05, // Higher value makes simulation stabilize faster
-  VELOCITY_DECAY: 0.4, // Higher value slows down node movement
-  
-  // Rendering optimization
-  RENDER_THROTTLE: 16, // Render at ~60fps
-};
+// Helper function to get connected node ids
+export function getConnectedNodes(networkData, nodeId) {
+  return networkData.links
+    .filter(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return sourceId === nodeId || targetId === nodeId;
+    })
+    .map(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return sourceId === nodeId ? targetId : sourceId;
+    });
+}
 
-// Throttle function to limit how often a function runs
-const throttle = (func, limit) => {
-  let inThrottle;
-  return function() {
-    const args = arguments;
-    const context = this;
-    if (!inThrottle) {
-      func.apply(context, args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+// Get connections for a specific person
+export function getPersonConnections(networkData, personId) {
+  if (!networkData.links) return [];
+  
+  const connections = [];
+  
+  networkData.links.forEach(link => {
+    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+    
+    if (sourceId === personId) {
+      const connectedPerson = networkData.nodes.find(n => n.id === targetId);
+      if (connectedPerson) {
+        connections.push({
+          ...connectedPerson,
+          connectionType: link.type || 'standard'
+        });
+      }
+    } else if (targetId === personId) {
+      const connectedPerson = networkData.nodes.find(n => n.id === sourceId);
+      if (connectedPerson) {
+        connections.push({
+          ...connectedPerson,
+          connectionType: link.type || 'standard'
+        });
+      }
     }
-  };
-};
+  });
+  
+  return connections;
+}
 
-export const renderNetworkGraph = ({
-  svgRef,
-  containerRef,
+// Initialize and render the D3 network graph
+export function renderNetworkGraph({
+  svgRef, 
+  containerRef, 
   tooltipRef,
-  networkData,
-  highlightIsraeli,
+  networkData, 
+  highlightIsraeli, 
   handleNodeClick,
   setHoveredNode
-}) => {
-  const svg = d3.select(svgRef.current);
-  const container = d3.select(containerRef.current);
-  const tooltip = d3.select(tooltipRef.current);
+}) {
+  // Clear any existing SVG content
+  d3.select(svgRef.current).selectAll("*").remove();
+
+  // Get container dimensions
+  const container = containerRef.current;
+  const width = container ? container.clientWidth : 800;
+  const height = container ? container.clientHeight : 600;
   
-  svg.selectAll("*").remove();
+  // Create the SVG
+  const svg = d3.select(svgRef.current)
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height]);
+    
+  // Add a subtle grid pattern for better visual depth
+  const defs = svg.append("defs");
   
-  // Get container dimensions for responsive sizing
-  const width = containerRef.current.clientWidth;
-  const height = containerRef.current.clientHeight;
+  // Add a subtle grid pattern
+  const pattern = defs.append("pattern")
+    .attr("id", "grid")
+    .attr("width", 40)
+    .attr("height", 40)
+    .attr("patternUnits", "userSpaceOnUse");
+    
+  pattern.append("path")
+    .attr("d", "M 40 0 L 0 0 0 40")
+    .attr("fill", "none")
+    .attr("stroke", "#222")
+    .attr("stroke-width", 0.5);
+    
+  // Add a radial gradient for node backgrounds
+  const gradient = defs.selectAll(".node-gradient")
+    .data(Object.entries(colorScheme))
+    .enter()
+    .append("radialGradient")
+    .attr("id", d => `gradient-${d[0]}`)
+    .attr("cx", "50%")
+    .attr("cy", "50%")
+    .attr("r", "50%");
+    
+  gradient.append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", d => d3.color(d[1].fill).brighter(0.5));
+    
+  gradient.append("stop")
+    .attr("offset", "80%")
+    .attr("stop-color", d => d[1].fill);
+    
+  gradient.append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", d => d3.color(d[1].fill).darker(0.5));
   
-  // Create the main SVG group for all elements
-  const g = svg.append("g");
+  // Add glow filter for highlighted nodes
+  const filter = defs.append("filter")
+    .attr("id", "glow")
+    .attr("x", "-50%")
+    .attr("y", "-50%")
+    .attr("width", "200%")
+    .attr("height", "200%");
+    
+  filter.append("feGaussianBlur")
+    .attr("stdDeviation", "3")
+    .attr("result", "coloredBlur");
+    
+  const femerge = filter.append("feMerge");
+  femerge.append("feMergeNode")
+    .attr("in", "coloredBlur");
+  femerge.append("feMergeNode")
+    .attr("in", "SourceGraphic");
   
-  // Create zoom behavior
+  // Add background rect with grid pattern
+  svg.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("fill", "#121212");
+  
+  // Add a subtle grid
+  svg.append("g")
+    .attr("class", "grid")
+    .selectAll("line")
+    .data(d3.range(0, width, 40))
+    .enter()
+    .append("line")
+    .attr("x1", d => d)
+    .attr("y1", 0)
+    .attr("x2", d => d)
+    .attr("y2", height)
+    .attr("stroke", "#222")
+    .attr("stroke-width", 0.5);
+    
+  svg.append("g")
+    .attr("class", "grid")
+    .selectAll("line")
+    .data(d3.range(0, height, 40))
+    .enter()
+    .append("line")
+    .attr("x1", 0)
+    .attr("y1", d => d)
+    .attr("x2", width)
+    .attr("y2", d => d)
+    .attr("stroke", "#222")
+    .attr("stroke-width", 0.5);
+  
+  // Add zoom functionality
   const zoom = d3.zoom()
-    .scaleExtent([0.1, 5])
+    .scaleExtent([0.3, 5])
     .on("zoom", (event) => {
       g.attr("transform", event.transform);
     });
   
   svg.call(zoom);
   
-  // Prioritize links to show (limit number of links to improve performance)
-  const prioritizedLinks = [...networkData.links]
-    .sort((a, b) => {
-      // Prioritize links connected to important nodes
-      const aImportance = getNodeImportance(a.source, networkData.nodes) + 
-                         getNodeImportance(a.target, networkData.nodes);
-      const bImportance = getNodeImportance(b.source, networkData.nodes) + 
-                         getNodeImportance(b.target, networkData.nodes);
-      return bImportance - aImportance;
-    })
-    .slice(0, PERFORMANCE_CONFIG.MAX_LINKS_RENDERED);
+  // Create a group for all elements (for zooming)
+  const g = svg.append("g");
+
+  // Pre-position nodes in a more stable pattern to reduce initial chaotic movement
+  const centerX = width / 2;
+  const centerY = height / 2;
   
-  // Create the force simulation
+  // Setup nodes in a circular pattern for more stable initial positions
+  const nodeCount = networkData.nodes.length;
+  const radius = Math.min(width, height) * 0.35;
+  
+  networkData.nodes.forEach((node, i) => {
+    // Position nodes in a circle to start
+    const angle = (i / nodeCount) * 2 * Math.PI;
+    node.x = centerX + radius * Math.cos(angle);
+    node.y = centerY + radius * Math.sin(angle);
+    
+    // Store initial position for fast reset
+    node.initialX = node.x;
+    node.initialY = node.y;
+  });
+
+  // Create a force simulation with optimized settings for less movement
   const simulation = d3.forceSimulation(networkData.nodes)
-    .force("link", d3.forceLink(prioritizedLinks)
+    .force("link", d3.forceLink(networkData.links)
       .id(d => d.id)
-      .distance(60)
-      .strength(PERFORMANCE_CONFIG.LINK_STRENGTH))
+      .distance(120)
+      .strength(0.3)) // Reduced link strength for less aggressive pulling
     .force("charge", d3.forceManyBody()
-      .strength(PERFORMANCE_CONFIG.CHARGE_STRENGTH))
-    .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("collision", d3.forceCollide(PERFORMANCE_CONFIG.COLLISION_RADIUS))
-    .alphaDecay(PERFORMANCE_CONFIG.ALPHA_DECAY)
-    .velocityDecay(PERFORMANCE_CONFIG.VELOCITY_DECAY);
+      .strength(-300) // Slightly reduced repulsive force
+      .distanceMax(300)) // Limit the distance of effect to reduce far-reaching forces
+    .force("center", d3.forceCenter(width / 2, height / 2).strength(0.05)) // Gentle centering force
+    .force("collision", d3.forceCollide().radius(d => d.group === 'israeli_connection' ? 45 : 35).strength(0.7))
+    .force("x", d3.forceX(width / 2).strength(0.02)) // Very gentle force to pull toward center X
+    .force("y", d3.forceY(height / 2).strength(0.02)) // Very gentle force to pull toward center Y
+    .velocityDecay(0.6) // Higher friction to dampen movement
+    .alphaDecay(0.1) // Faster decay for quicker stabilization
+    .alphaMin(0.001); // Stop simulation sooner
+
+  // Stop simulation after shorter time (3 seconds) to prevent continuous CPU usage
+  setTimeout(() => {
+    if (simulation) {
+      simulation.stop();
+      console.log("Force simulation stopped to save resources");
+    }
+  }, 3000);
   
-  // Draw links with optimized rendering
+  // Draw lines with simplified styling
   const link = g.append("g")
     .attr("class", "links")
     .selectAll("line")
-    .data(prioritizedLinks)
-    .enter().append("line")
-    .attr("stroke", d => {
-      // Determine if this is an Israeli connection
-      const sourceIsIsraeli = d.source.group === 'israeli_intelligence' || d.source.israeli_connection;
-      const targetIsIsraeli = d.target.group === 'israeli_intelligence' || d.target.israeli_connection;
-      
-      if (highlightIsraeli && (sourceIsIsraeli || targetIsIsraeli)) {
-        return "#0038b8"; // Israeli blue
-      }
-      return "#444";
-    })
-    .attr("stroke-width", d => {
-      // Make important connections more visible
-      const sourceIsIsraeli = d.source.group === 'israeli_intelligence' || d.source.israeli_connection;
-      const targetIsIsraeli = d.target.group === 'israeli_intelligence' || d.target.israeli_connection;
-      
-      if (highlightIsraeli && (sourceIsIsraeli || targetIsIsraeli)) {
-        return 1.5;
-      }
-      return 0.8;
-    })
-    .attr("stroke-opacity", PERFORMANCE_CONFIG.LINK_OPACITY);
-  
-  // Draw nodes with optimized rendering
+    .data(networkData.links)
+    .enter()
+    .append("line")
+    .attr("stroke", d => d.type === 'israeli_connection' ? "#ff8c00" : "#444")
+    .attr("stroke-opacity", d => d.type === 'israeli_connection' ? 0.8 : 0.4)
+    .attr("stroke-width", d => d.type === 'israeli_connection' ? 2 : 1) // Slightly reduced for performance
+    .attr("stroke-dasharray", d => d.type === 'israeli_connection' ? "none" : "3,3")
+    // Render lines with simplified path calculation
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y);
+
+  // Add Menorah image to defs
+  defs.append("symbol")
+    .attr("id", "menorah-symbol")
+    .attr("viewBox", "0 0 100 100")
+    .attr("width", 70)
+    .attr("height", 70)
+    .html(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#3b82f6">
+        <!-- Base -->
+        <rect x="40" y="85" width="20" height="10" rx="2" />
+        <rect x="35" y="80" width="30" height="5" rx="1" />
+        
+        <!-- Center stem -->
+        <rect x="48" y="30" width="4" height="50" />
+        
+        <!-- Candle holders -->
+        <circle cx="50" cy="25" r="4" />
+        <circle cx="35" cy="25" r="4" />
+        <circle cx="20" cy="25" r="4" />
+        <circle cx="65" cy="25" r="4" />
+        <circle cx="80" cy="25" r="4" />
+        <circle cx="27.5" cy="25" r="4" />
+        <circle cx="42.5" cy="25" r="4" />
+        <circle cx="57.5" cy="25" r="4" />
+        <circle cx="72.5" cy="25" r="4" />
+        
+        <!-- Arms -->
+        <path d="M50,30 Q35,50 35,25" stroke-width="4" stroke="#3b82f6" fill="none" />
+        <path d="M50,30 Q20,70 20,25" stroke-width="4" stroke="#3b82f6" fill="none" />
+        <path d="M50,30 Q65,50 65,25" stroke-width="4" stroke="#3b82f6" fill="none" />
+        <path d="M50,30 Q80,70 80,25" stroke-width="4" stroke="#3b82f6" fill="none" />
+        <path d="M50,30 Q27.5,60 27.5,25" stroke-width="4" stroke="#3b82f6" fill="none" />
+        <path d="M50,30 Q42.5,45 42.5,25" stroke-width="4" stroke="#3b82f6" fill="none" />
+        <path d="M50,30 Q57.5,45 57.5,25" stroke-width="4" stroke="#3b82f6" fill="none" />
+        <path d="M50,30 Q72.5,60 72.5,25" stroke-width="4" stroke="#3b82f6" fill="none" />
+        
+        <!-- Shamash (taller center candle) -->
+        <rect x="48" y="15" width="4" height="10" />
+        <circle cx="50" cy="12" r="4" />
+      </svg>
+    `);
+
+  // Create node groups
   const node = g.append("g")
     .attr("class", "nodes")
-    .selectAll("circle")
+    .selectAll(".node")
     .data(networkData.nodes)
-    .enter().append("circle")
-    .attr("r", d => {
-      // Adjust node size based on importance
-      return 5 + (getNodeImportance(d.id, networkData.nodes) * 3);
+    .enter()
+    .append("g")
+    .attr("class", "node")
+    .call(d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended))
+    .on("click", (event, d) => {
+      event.stopPropagation();
+      handleNodeClick(d);
     })
-    .attr("fill", d => {
-      if (d.israeli_connection && highlightIsraeli) {
-        return "#0038b8"; // Israeli blue
-      }
-      return colorScheme[d.group || 'other'].fill;
+    .on("mouseover", (event, d) => {
+      setHoveredNode(d);
+      
+      // Highlight this node and connected nodes
+      const connected = getConnectedNodes(networkData, d.id);
+      
+      node.style("opacity", n => {
+        if (n.id === d.id) return 1;
+        if (connected.includes(n.id)) return 0.8;
+        return 0.3;
+      });
+      
+      link.style("opacity", l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        
+        if (sourceId === d.id || targetId === d.id) return 1;
+        return 0.1;
+      });
+      
+      // Show tooltip
+      const tooltip = d3.select(tooltipRef.current);
+      tooltip
+        .style("display", "block")
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY - 10}px`);
     })
-    .attr("stroke", d => {
-      if (d.israeli_connection && highlightIsraeli) {
-        return "#ffffff";
-      }
-      return colorScheme[d.group || 'other'].stroke;
+    .on("mousemove", (event) => {
+      // Move tooltip with mouse
+      const tooltip = d3.select(tooltipRef.current);
+      tooltip
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY - 10}px`);
     })
-    .attr("stroke-width", d => d.israeli_connection && highlightIsraeli ? 2 : 1)
-    .call(drag(simulation));
+    .on("mouseout", () => {
+      setHoveredNode(null);
+      
+      // Reset opacity
+      node.style("opacity", d => {
+        if (highlightIsraeli) {
+          return d.group === 'israeli_connection' ? 1 : 0.5;
+        }
+        return 1;
+      });
+      
+      link.style("opacity", l => {
+        if (highlightIsraeli) {
+          return l.type === 'israeli_connection' ? 0.9 : 0.2;
+        }
+        return 0.7;
+      });
+      
+      // Hide tooltip
+      d3.select(tooltipRef.current).style("display", "none");
+    });
+
+  // Add circles to nodes with gradient fills
+  node.append("circle")
+    .attr("r", d => d.group === 'israeli_connection' ? 35 : 28)
+    .attr("fill", d => d.group === 'israeli_connection' ? 'url(#gradient-israeli_connection)' : `url(#gradient-${d.group || 'other'})`)
+    .attr("stroke", d => colorScheme[d.group || 'other'].stroke)
+    .attr("stroke-width", d => d.group === 'israeli_connection' ? 3 : 2)
+    .attr("filter", d => d.group === 'israeli_connection' ? "url(#glow)" : "none");
+
+  // Add Menorah icon for Israeli connections instead of star
+  node.filter(d => d.group === 'israeli_connection')
+    .append("use")
+    .attr("href", "#menorah-symbol")
+    .attr("x", -25)
+    .attr("y", -25)
+    .attr("width", 50)
+    .attr("height", 50);
+
+  // Add labels to nodes
+  node.append("text")
+    .text(d => d.name)
+    .attr("font-size", "10px")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#fff")
+    .attr("dy", "0.35em")
+    .attr("pointer-events", "none")
+    .style("text-shadow", "0 0 3px rgba(0,0,0,0.8)");
+
+  // Apply a visual effect to highlight Israeli connections
+  if (highlightIsraeli) {
+    node.filter(d => d.group !== 'israeli_connection')
+      .style("opacity", 0.5);
+    
+    link.filter(d => d.type !== 'israeli_connection')
+      .style("opacity", 0.2);
+  }
+
+  // Add a reset button to help when layout gets messy
+  const resetButton = svg.append("g")
+    .attr("class", "reset-button")
+    .attr("transform", `translate(${width - 60}, 30)`)
+    .style("cursor", "pointer")
+    .on("click", resetLayout);
+    
+  resetButton.append("rect")
+    .attr("width", 50)
+    .attr("height", 25)
+    .attr("rx", 5)
+    .attr("fill", "#333")
+    .attr("stroke", "#666")
+    .attr("stroke-width", 1);
+    
+  resetButton.append("text")
+    .text("Reset")
+    .attr("x", 25)
+    .attr("y", 16)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#fff")
+    .style("font-size", "12px");
+
+  // Limit number of ticks to reduce performance impact
+  let tickCounter = 0;
+  const MAX_TICKS = 100; // Limit total simulation steps
   
-  // Optimize tooltip events using throttling
-  node.on("mouseover", throttle(function(event, d) {
-    setHoveredNode(d);
-    tooltip.style("display", "block")
-      .style("left", `${event.pageX + 10}px`)
-      .style("top", `${event.pageY - 10}px`);
-  }, 100))
-  .on("mouseout", () => {
-    setHoveredNode(null);
-    tooltip.style("display", "none");
-  })
-  .on("click", (event, d) => {
-    event.stopPropagation();
-    handleNodeClick(d);
-  });
-  
-  // Throttled tick function to improve performance
-  const tickFunction = () => {
+  // Update positions on each tick with limited iterations
+  simulation.on("tick", () => {
+    tickCounter++;
+    
+    // Stop after MAX_TICKS iterations
+    if (tickCounter >= MAX_TICKS) {
+      simulation.stop();
+      console.log("Force simulation stopped after reaching max ticks");
+      return;
+    }
+    
+    // Keep nodes within bounds for better visibility
+    networkData.nodes.forEach(d => {
+      d.x = Math.max(30, Math.min(width - 30, d.x));
+      d.y = Math.max(30, Math.min(height - 30, d.y));
+    });
+    
+    // Update link positions
     link
       .attr("x1", d => d.source.x)
       .attr("y1", d => d.source.y)
       .attr("x2", d => d.target.x)
       .attr("y2", d => d.target.y);
-    
+
+    // Update node positions
     node
-      .attr("cx", d => {
-        // Keep nodes within bounds
-        return d.x = Math.max(10, Math.min(width - 10, d.x));
-      })
-      .attr("cy", d => {
-        return d.y = Math.max(10, Math.min(height - 10, d.y));
-      });
-  };
-  
-  // Create throttled tick handler for better performance
-  const throttledTick = throttle(tickFunction, PERFORMANCE_CONFIG.RENDER_THROTTLE);
-  simulation.on("tick", throttledTick);
-  
-  // Drag functionality
-  function drag(simulation) {
-    function dragstarted(event) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      event.subject.fx = event.subject.x;
-      event.subject.fy = event.subject.y;
-    }
+      .attr("transform", d => `translate(${d.x}, ${d.y})`);
+  });
+
+  // Reset layout function - returns bubbles to initial positions
+  function resetLayout() {
+    simulation.stop();
     
-    function dragged(event) {
-      event.subject.fx = event.x;
-      event.subject.fy = event.y;
-    }
+    // Return nodes to initial circular layout
+    networkData.nodes.forEach((node, i) => {
+      node.x = node.initialX;
+      node.y = node.initialY;
+    });
     
-    function dragended(event) {
-      if (!event.active) simulation.alphaTarget(0);
-      event.subject.fx = null;
-      event.subject.fy = null;
-    }
-    
-    return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
+    // Update positions without simulation
+    link
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+      
+    node
+      .attr("transform", d => `translate(${d.x}, ${d.y})`);
   }
-  
-  // Helper function to determine node importance
-  function getNodeImportance(nodeId, nodes) {
-    // Count connections to this node
-    const node = typeof nodeId === 'object' ? nodeId : 
-                 nodes.find(n => n.id === nodeId);
-    
-    if (!node) return 1;
-    
-    // Base importance on predefined groups
-    const groupImportance = {
-      'main': 5,
-      'suspect': 4,
-      'israeli_intelligence': 4,
-      'us_intelligence': 3.5,
-      'involved': 3,
-      'witness': 2,
-      'investigation': 2.5,
-      'organized_crime': 3,
-      'government': 2,
-      'other': 1
-    };
-    
-    return groupImportance[node.group] || 1;
+
+  // Modified drag functions for better stability
+  function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.2).restart();
+    d.fx = d.x;
+    d.fy = d.y;
   }
-  
+
+  function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+    
+    // Update position immediately for responsive dragging
+    d3.select(this).attr("transform", `translate(${event.x}, ${event.y})`);
+    
+    // Update connected links
+    link
+      .filter(l => l.source === d || l.target === d)
+      .attr("x1", l => (l.source === d) ? event.x : l.source.x)
+      .attr("y1", l => (l.source === d) ? event.y : l.source.y)
+      .attr("x2", l => (l.target === d) ? event.x : l.target.x)
+      .attr("y2", l => (l.target === d) ? event.y : l.target.y);
+  }
+
+  function dragended(event, d) {
+    if (!event.active) {
+      simulation.alphaTarget(0);
+      // Stop simulation after drag finishes
+      setTimeout(() => simulation.stop(), 500);
+    }
+    // Keep node fixed where the user dropped it
+    // This prevents further automatic movements
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+
   // Return cleanup function
   return () => {
-    simulation.stop();
-    svg.selectAll("*").remove();
+    if (simulation) simulation.stop();
   };
-};
-
-export function getPersonConnections(networkData, personId) {
-  if (!networkData.links) return [];
-  
-  return networkData.links
-    .filter(link => link.source.id === personId || link.target.id === personId || 
-                    link.source === personId || link.target === personId)
-    .map(link => {
-      const otherId = link.source.id === personId || link.source === personId 
-        ? (link.target.id || link.target) 
-        : (link.source.id || link.source);
-      
-      const otherNode = networkData.nodes.find(node => node.id === otherId);
-      
-      return {
-        id: otherId,
-        name: otherNode ? otherNode.name : otherId,
-        group: otherNode ? otherNode.group : 'unknown',
-        relationship: link.relationship || 'connected to'
-      };
-    });
 }
 
-// Legend item component
+// Helper component for legend items
 export const LegendItem = ({ color, label }) => (
-  <div className="flex items-center mb-1">
-    <div 
-      className="w-4 h-4 mr-2 rounded-sm" 
-      style={{ backgroundColor: color }}
-    ></div>
-    <span className="text-sm">{label}</span>
+  <div className="flex items-center mr-4">
+    <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: color }} />
+    <span className="text-sm text-gray-300">{label}</span>
   </div>
 );

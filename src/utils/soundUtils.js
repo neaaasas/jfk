@@ -5,7 +5,6 @@ let clickSound = null;
 const DEFAULT_MUSIC_VOLUME = 0.3;
 const DEFAULT_CLICK_VOLUME = 0.7;
 const DUCK_VOLUME_PERCENTAGE = 0.25; // Music reduces to 25% of its original volume during clicks
-const MUSIC_START_TIME = 5; // Skip first 5 seconds of background music
 
 // Initialize audio files
 export function initializeAudio() {
@@ -14,12 +13,6 @@ export function initializeAudio() {
     backgroundMusic = new Audio('/assets/background.mp3');
     backgroundMusic.loop = true;
     backgroundMusic.volume = DEFAULT_MUSIC_VOLUME;
-    
-    // Add event listener to skip the first 5 seconds when music can play
-    backgroundMusic.addEventListener('canplaythrough', () => {
-      // Set the current time to 5 seconds
-      backgroundMusic.currentTime = MUSIC_START_TIME;
-    });
     
     console.log("Background music initialized at:", '/assets/background.mp3');
     
@@ -36,11 +29,6 @@ export function initializeAudio() {
 // Control background music
 export function playBackgroundMusic() {
   if (backgroundMusic) {
-    // Set current time to skip first 5 seconds if starting from beginning
-    if (backgroundMusic.currentTime === 0 || backgroundMusic.currentTime < MUSIC_START_TIME) {
-      backgroundMusic.currentTime = MUSIC_START_TIME;
-    }
-    
     backgroundMusic.play().catch(error => {
       console.error("Error playing background music:", error);
     });

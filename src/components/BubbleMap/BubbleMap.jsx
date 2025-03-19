@@ -17,12 +17,14 @@ const BubbleMap = () => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
   const tooltipRef = useRef(null);
+  const simulationRef = useRef(null);
   
   const [isLoading, setIsLoading] = useState(true);
   const [networkData, setNetworkData] = useState({ nodes: [], links: [] });
   const [highlightIsraeli, setHighlightIsraeli] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [isSimulationActive, setIsSimulationActive] = useState(true);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -138,6 +140,11 @@ const BubbleMap = () => {
             >
               {highlightIsraeli ? 'Highlighting Israeli Connections' : 'Show All Connections Equally'}
             </button>
+            
+            {/* Performance hint message */}
+            <span className="text-xs text-gray-400 ml-2">
+              Drag nodes to position them. Click Reset button in the top right corner if needed.
+            </span>
             
             <div className="ml-auto flex">
               <input
